@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>  
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>聊天室</title>
+</head>
+<body>
+<script type="text/javascript" src="http://cdn.bootcss.com/jquery/3.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="http://cdn.bootcss.com/sockjs-client/1.1.1/sockjs.js"></script>
+<script type="text/javascript">
+    var websocket = null;
+    if ('WebSocket' in window) {
+        websocket = new WebSocket("ws://localhost:8080/websocket");
+    } 
+    else if ('MozWebSocket' in window) {
+        websocket = new MozWebSocket("ws://localhost:8080/websocket");
+    } 
+    else {
+        websocket = new SockJS("http://localhost:8080/websocket");
+    }
+    websocket.onopen = onOpen;
+    websocket.onmessage = onMessage;
+    websocket.onerror = onError;
+    websocket.onclose = onClose;
+              
+    function onOpen(openEvt) {
+        //alert(openEvt.Data);
+    }
+    
+    function onMessage(evt) {
+        //document.getElementById('publicMsg').innerHTML=evt.data.innerHTML=evt.data;
+        var evet = document.getElementById('publicMsg');
+        var para=document.createElement("p");
+        var node=document.createTextNode(evt.data);
+        para.appendChild(node);
+        evet.appendChild(para);
+    }
+
+        websocket.onmessage = function(event) {
+　　　　　　　　//接收来自服务器的数据，这里客户端没有发送任何请求，任何时间接收到数据都可以异步调用
+              onMessage(event);
+        };
+
+    function onError() {}
+    function onClose() {}
+    
+    function doSend() {
+        if (websocket.readyState == websocket.OPEN) {          
+            var msg = document.getElementById("inputMsg").value;  
+            websocket.send(msg);//调用后台handleTextMessage方法
+        } else {  
+            alert("连接失败!");  
+        }  
+    }
+　　　window.close=function()
+　　　{
+　　　　　websocket.onclose();
+　　　}
+
+
+
+</script>
+请输入：<textarea rows="5" cols="30" id="inputMsg" name="inputMsg"></textarea>
+<button onclick="doSend();">发送</button>
+
+
+<div id="publicMsg" style=" width: 500px; height: 240px; border:1px solid #000;overflow-y:auto">
+    
+</div>
+</body>
+</html>
